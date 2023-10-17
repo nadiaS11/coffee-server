@@ -28,6 +28,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
 
     const coffeeCollection = await client.db("coffeeDB").collection("coffee");
+    const userCollection = await client.db("userDB").collection("user");
 
     //read or get from the server
     app.get("/coffees", async (req, res) => {
@@ -35,6 +36,12 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
+    app.get("/users", async (req, res) => {
+      const cursor = userCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     //send to server from form input
     app.post("/coffees", async (req, res) => {
       const newCoffee = req.body;
@@ -43,6 +50,30 @@ async function run() {
       const result = await coffeeCollection.insertOne(newCoffee);
       res.send(result);
     });
+
+    //post users
+    app.post("/users", async (req, res) => {
+      const newUser = req.body;
+      console.log(newUser);
+
+      const result = await userCollection.insertOne(newUser);
+      res.send(result);
+    });
+    //update a small part
+    app.patch("/users", async (req, res) => {
+      const user = req.body;
+      console.log(user);
+      const filter = { email: user.email };
+      const updateDoc = {
+        $set: {
+          lastLoggedAt: user.lastLoggedAt,
+        },
+      };
+
+      const result = await userCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
     //read or update a specific one
     app.get("/coffees/:id", async (req, res) => {
       const id = req.params.id;
